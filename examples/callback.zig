@@ -31,7 +31,7 @@ pub fn main() !void {
     defer zasm.deinit();
 
     const jit = zasm.State.init();
-    defer jit.destroy();
+    defer jit.deinit();
 
     const func = emitFunc(jit);
     func(6, 7);

@@ -21,13 +21,8 @@ pub const Node = c.jit_node_t;
 // Global init/deinit
 // ------------------------------------------------------------------------------------------------
 
-pub fn init(program_name: [*:0]const u8) void {
-    c.init_jit(program_name);
-}
-
-pub fn deinit() void {
-    c.finish_jit();
-}
+pub fn init(program_name: [*:0]const u8) void { c.init_jit(program_name); }
+pub fn deinit() void { c.finish_jit(); }
 
 // ------------------------------------------------------------------------------------------------
 // Registers
@@ -49,7 +44,7 @@ pub const State = struct {
 
     pub fn init() State { return .{ .ptr = c.jit_new_state().? }; }
     pub fn clear(self: State) void { c._jit_clear_state(self.ptr); }
-    pub fn destroy(self: State) void { c._jit_destroy_state(self.ptr); }
+    pub fn deinit(self: State) void { c._jit_destroy_state(self.ptr); }
 
     // ---- Code generation control ----
 
