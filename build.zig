@@ -14,10 +14,9 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     translate_c.addIncludePath(b.path("libs/lightning/include"));
-
     const c_module = translate_c.createModule();
 
-    const module = b.addModule("root", .{
+    const module = b.addModule("zjit", .{
         .root_source_file = b.path("src/zjit.zig"),
         .target = target,
         .optimize = optimize,
@@ -32,7 +31,7 @@ pub fn build(b: *std.Build) void {
         "examples/callback.zig",
     };
 
-    const examples_step = b.step("examples", "Build and run all examples");
+    const examples_step = b.step("examples", "Run examples");
     for (example_files) |path| {
         const name = std.fs.path.stem(path);
         const exe = b.addExecutable(.{
@@ -43,15 +42,13 @@ pub fn build(b: *std.Build) void {
                 .optimize = optimize,
                 .imports = &.{
                     .{ .name = "zjit", .module = module },
-                    .{ .name = "c", .module = c_module },
                 },
             }),
         });
-        b.installArtifact(exe);
         examples_step.dependOn(&b.addRunArtifact(exe).step);
     }
 
-    const test_step = b.step("test", "Run zasm tests");
+    const test_step = b.step("test", "Run tests");
     const tests = b.addTest(.{
         .name = "zjit-tests",
         .root_module = b.createModule(.{
@@ -64,7 +61,6 @@ pub fn build(b: *std.Build) void {
         }),
     });
     tests.root_module.linkLibrary(lightning);
-    b.installArtifact(tests);
     test_step.dependOn(&b.addRunArtifact(tests).step);
 }
 
@@ -82,13 +78,28 @@ fn buildLightning(
             .optimize = optimize,
         }),
     });
-
     lib.root_module.link_libc = true;
-    lib.installHeadersDirectory(b.path("libs/lightning/include"), "", .{});
+
+    const os = target.result.os.tag;
+    const have_mmap: bool = os != .windows;
+    const have_mremap: bool = os == .linux;
+
+    const config_h = b.addConfigHeader(.{
+        .style = .blank,
+        .include_path = "config.h",
+    }, .{
+        .HAVE_CONFIG_H = true,
+        .HAVE_MMAP = have_mmap,
+        .HAVE_MREMAP = have_mremap,
+        .DISASSEMBLER = false,
+        .HAVE_DISASSEMBLE_INIT_FOR_TARGET = false,
+        .STDC_HEADERS = true,
+    });
 
     lib.root_module.addIncludePath(b.path("libs/lightning/include"));
     lib.root_module.addIncludePath(b.path("libs/lightning/lib"));
     lib.root_module.addIncludePath(b.path("libs/lightning"));
+    lib.root_module.addConfigHeader(config_h);
 
     const src = "libs/lightning/lib/";
     lib.root_module.addCSourceFiles(.{
