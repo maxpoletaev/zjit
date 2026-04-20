@@ -6,6 +6,7 @@ pub fn build(b: *std.Build) void {
     const linkage = b.option(std.builtin.LinkMode, "linkage", "") orelse .static;
 
     const lightning = buildLightning(b, target, optimize, linkage);
+    if (linkage == .dynamic) b.installArtifact(lightning);
 
     const translate_c = b.addTranslateC(.{
         .root_source_file = b.path("libs/lightning/include/lightning.h"),
@@ -78,7 +79,6 @@ fn buildLightning(
         }),
     });
     lib.root_module.link_libc = true;
-    lib.installHeadersDirectory(b.path("libs/lightning/include"), "", .{});
 
     const os = target.result.os.tag;
     const have_mmap: bool = os != .windows;
@@ -122,8 +122,6 @@ fn buildLightning(
         .windows => lib.root_module.addCMacro("WIN32", "1"),
         else => {},
     }
-
-    b.installArtifact(lib);
 
     return lib;
 }
