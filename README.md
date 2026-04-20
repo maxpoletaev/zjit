@@ -4,6 +4,10 @@ zjit is a bare-bones JIT code emitter for Zig wrapping [GNU Lightning](https://w
 
 ## Add to your project
 
+```
+zig fetch --save https://github.com/maxpoletaev/zjit.git
+```
+
 ```zig
 const zjit = b.dependency("zjit", .{
     .target = target,
@@ -45,6 +49,28 @@ pub fn main() !void {
     std.debug.print("{d}\n", .{result}); // 7
 }
 ```
+
+## Quick Overview
+
+Lightning exposes a portable RISC-like instruction set.
+
+There are around 60 base instructions like `add`, `mul`, `mov`, etc., which come in different variants for different operand types.
+
+* `r` - all operands are registers
+* `i` - one operand is an immediate constant
+
+All instructions are signed and use native word size by default, but there are additional suffixes to specify the operand size:
+
+* `_l` — 64-bit integer
+* `_i` — 32-bit integer
+* `_s` — 16-bit integer
+* `_c` — 8-bit integer
+* `_f` — float
+* `_d` — double
+* `_u` — unsigned
+
+Depending on the architecture, there are (at least) six general purpose registers: `R(0-2)` (caller-save), `V(0-2)` (callee-save), and six floating point registers: `F(0-5)`.
+
 
 ## Dynamic Linking
 

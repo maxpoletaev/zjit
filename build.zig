@@ -16,7 +16,7 @@ pub fn build(b: *std.Build) void {
     translate_c.addIncludePath(b.path("libs/lightning/include"));
     const c_module = translate_c.createModule();
 
-    const module = b.addModule("zjit", .{
+    const module = b.addModule("root", .{
         .root_source_file = b.path("src/zjit.zig"),
         .target = target,
         .optimize = optimize,
