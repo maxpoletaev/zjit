@@ -7,7 +7,7 @@ fn nativeFunc(a: i64, b: i64) callconv(.c) void {
 
 const Func = *const fn (i64, i64) callconv(.c) void;
 
-fn emitFunc(jit: zjit.State) Func {
+fn emitFunc(jit: *zjit.State) Func {
     jit.prolog();
     const r0 = zjit.R(0);
     const r1 = zjit.R(1);
@@ -30,9 +30,9 @@ pub fn main() !void {
     zjit.init("example");
     defer zjit.deinit();
 
-    const jit = zjit.State.init();
+    var jit = zjit.State.init();
     defer jit.deinit();
 
-    const func = emitFunc(jit);
+    const func = emitFunc(&jit);
     func(6, 7);
 }

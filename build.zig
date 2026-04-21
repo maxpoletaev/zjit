@@ -29,6 +29,7 @@ pub fn build(b: *std.Build) void {
     const example_files = &[_][]const u8{
         "examples/add.zig",
         "examples/callback.zig",
+        "examples/branch.zig",
     };
 
     const examples_step = b.step("examples", "Run examples");
